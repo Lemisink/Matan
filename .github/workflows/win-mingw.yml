@@ -28,8 +28,7 @@ jobs:
           cmake -S . -B build -G "Ninja" \
             -DMATAN_ENABLE_TAURI=OFF \
             -DMATAN_EMBED_GINAC=ON \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="/mingw64"
+            -DCMAKE_BUILD_TYPE=Release
           ninja -C build
 
       - name: Stage matan_app.exe for Tauri bundle

@@ -114,9 +114,6 @@ target_include_directories(matan_diff PUBLIC
 )
 target_link_libraries(matan_diff PUBLIC matan_expr)
 if (MATAN_EMBED_GINAC)
-    target_compile_definitions(matan_diff PUBLIC MATAN_HAS_GINAC=1)
-endif()
-if (MATAN_EMBED_GINAC)
     add_dependencies(matan_diff ginac_ext)
     target_include_directories(matan_diff PRIVATE
         ${GINAC_INSTALL_DIR}/include
@@ -127,11 +124,13 @@ target_link_libraries(matan_diff PUBLIC
         ${CLNN_INSTALL_DIR}/lib/libcln.so
         gmp
     )
+    target_compile_definitions(matan_diff PUBLIC MATAN_HAS_GINAC=1)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GINAC REQUIRED ginac)
     target_include_directories(matan_diff PRIVATE ${GINAC_INCLUDE_DIRS})
     target_link_libraries(matan_diff PUBLIC ${GINAC_LIBRARIES})
+    target_compile_definitions(matan_diff PUBLIC MATAN_HAS_GINAC=1)
 endif()
 if (OpenMP_CXX_FOUND)
     target_link_libraries(matan_diff PRIVATE OpenMP::OpenMP_CXX)
