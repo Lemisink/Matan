@@ -1,0 +1,66 @@
+name: build-windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "core/**"
+      - "apps/desktop/**"
+      - "CMakeLists.txt"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      BUILD_TYPE: Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: stable
+          targets: x86_64-pc-windows-msvc
+
+      - name: Configure CMake (core)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DMATAN_ENABLE_TAURI=OFF
+
+      - name: Build matan_app.exe
+        run: cmake --build build --config ${{ env.BUILD_TYPE }}
+
+      - name: Stage matan_app into Tauri resources
+        shell: bash
+        run: |
+          mkdir -p apps/desktop/src-tauri/resources/bin
+          cp dist/bin/matan_app.exe apps/desktop/src-tauri/resources/bin/
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: apps/desktop
+
+      - name: Build Tauri bundle (NSIS)
+        run: npm run tauri build -- --bundles nsis
+        working-directory: apps/desktop
+
+      - name: Upload Tauri bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matan-tauri-windows
+          path: apps/desktop/src-tauri/target/release/bundle/**
+
+      - name: Upload CLI binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: matan-app-windows
+          path: dist/bin/matan_app.exe

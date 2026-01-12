@@ -1,0 +1,54 @@
+name: win-mingw-ginac
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSYS2 with mingw64 toolchain and deps
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-ginac
+            mingw-w64-x86_64-cln
+            mingw-w64-x86_64-gmp
+            mingw-w64-x86_64-nodejs
+            mingw-w64-x86_64-rust
+
+      - name: Build CLI with system GiNaC (mingw64)
+        shell: msys2 {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          cmake -S . -B build -G "Ninja" \
+            -DMATAN_ENABLE_TAURI=OFF \
+            -DMATAN_EMBED_GINAC=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="/mingw64"
+          ninja -C build
+
+      - name: Build Tauri (NSIS) with GiNaC
+        shell: msys2 {0}
+        run: |
+          cd $GITHUB_WORKSPACE/apps/desktop
+          npm ci
+          npm run tauri build -- --bundles nsis
+
+      - name: Upload CLI binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: matan-cli-ginac
+          path: dist/bin/matan_app.exe
+
+      - name: Upload Tauri installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: matan-tauri-ginac
+          path: apps/desktop/src-tauri/target/release/bundle/nsis/**
