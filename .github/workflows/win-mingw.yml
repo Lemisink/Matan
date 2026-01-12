@@ -17,8 +17,6 @@ jobs:
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-ginac
-            mingw-w64-x86_64-cln
             mingw-w64-x86_64-gmp
             mingw-w64-x86_64-nodejs
             mingw-w64-x86_64-rust
@@ -29,10 +27,17 @@ jobs:
           cd $GITHUB_WORKSPACE
           cmake -S . -B build -G "Ninja" \
             -DMATAN_ENABLE_TAURI=OFF \
-            -DMATAN_EMBED_GINAC=OFF \
+            -DMATAN_EMBED_GINAC=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="/mingw64"
           ninja -C build
+
+      - name: Stage matan_app.exe for Tauri bundle
+        shell: msys2 {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir -p apps/desktop/src-tauri/resources/bin
+          cp dist/bin/matan_app.exe apps/desktop/src-tauri/resources/bin/matan_app.exe
 
       - name: Build Tauri (NSIS) with GiNaC
         shell: msys2 {0}

@@ -50,11 +50,7 @@ endif()
 
 include(ExternalProject)
 
-if (WIN32)
-    option(MATAN_EMBED_GINAC "Build GiNaC from source (external)" OFF)
-else()
-    option(MATAN_EMBED_GINAC "Build GiNaC from source (external)" ON)
-endif()
+option(MATAN_EMBED_GINAC "Build GiNaC from source (external)" OFF)
 set(MATAN_GINAC_PREFIX "${CMAKE_BINARY_DIR}/external/ginac")
 set(MATAN_GINAC_SRC "${MATAN_CORE_DIR}/external/ginac")
 set(MATAN_CLN_SRC "${MATAN_CORE_DIR}/external/cln")
