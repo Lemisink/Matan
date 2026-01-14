@@ -23,17 +23,13 @@ int main(int argc, char** argv) {
     ctx.h = cfg.task2.h;
 
     auto task = matan::createTask(cfg);
-    if (cfg.general.task == matan::TaskKind::Differentiate) {
-      ctx.dfunc = matan::deriveSymbolicDerivative(ctx.func);
-    }
     auto result = task->run(ctx);
-    if (const auto* res = std::get_if<matan::MinimizationResult>(&result)) {
-      matan::writeTask1Result(*res, ctx.func, ctx.a, ctx.b, cfg.output.data_dir);
-    } else if (const auto* res = std::get_if<matan::DerivativeResult>(&result)) {
-      matan::writeTask2Result(*res, cfg.output.data_dir);
+    if (const auto* res_min = std::get_if<matan::MinimizationResult>(&result)) {
+      matan::writeTask1Result(*res_min, ctx.func, ctx.a, ctx.b, cfg.output.data_dir);
+    } else if (const auto* res_der = std::get_if<matan::DerivativeResult>(&result)) {
+      matan::writeTask2Result(*res_der, cfg.output.data_dir);
       auto combined = matan::runAllDifferences(ctx.func, ctx.a, ctx.b, ctx.h);
       matan::writeTask2Combined(combined, cfg.output.data_dir);
-      matan::writeTask2DerivativeExpr(combined.derivative_expr, cfg.output.data_dir);
       if (cfg.task2.rmse_sweep) {
         auto sweep = matan::runRmseSweep(ctx.func, ctx.a, ctx.b, ctx.h, 5);
         matan::writeTask2Rmse(sweep, cfg.output.data_dir);

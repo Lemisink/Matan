@@ -36,4 +36,4 @@ std::unique_ptr<Task> createTask(const Config& cfg) {
   throw std::runtime_error("Unknown task");
 }
 
-}  // namespace matan
+}

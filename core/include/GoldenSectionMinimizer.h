@@ -10,4 +10,4 @@ class GoldenSectionMinimizer final : public Minimizer {
   MinimizationResult minimize(const MinimizationContext& ctx) const override;
 };
 
-}  // namespace matan
+}

@@ -34,4 +34,4 @@ void Differentiator::finalize(DerivativeResult& result) const {
   result.rmse = std::sqrt(sum_sq / static_cast<double>(result.samples.size()));
 }
 
-}  // namespace matan
+}

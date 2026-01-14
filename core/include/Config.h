@@ -33,4 +33,4 @@ struct Config {
   static Config load(const std::string& path);
 };
 
-}  // namespace matan
+}

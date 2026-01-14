@@ -9,4 +9,4 @@ namespace matan {
 
 std::unique_ptr<Task> createTask(const Config& cfg);
 
-}  // namespace matan
+}

@@ -13,4 +13,4 @@ class DichotomyMinimizer final : public Minimizer {
   double delta_;
 };
 
-}  // namespace matan
+}

@@ -55,5 +55,5 @@ inline double rightBoundaryDerivative(const std::vector<double>& y, double h) {
   return (y[n - 3] - 4.0 * y[n - 2] + 3.0 * y[n - 1]) / (2.0 * h);
 }
 
-}  // namespace matan
+}
 

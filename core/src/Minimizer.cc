@@ -24,4 +24,4 @@ void Minimizer::logIteration(MinimizationResult& result, int k, double a, double
   result.iterations.push_back(state);
 }
 
-}  // namespace matan
+}

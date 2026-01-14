@@ -1,6 +1,7 @@
 #include "DichotomyMinimizer.h"
 
 #include <algorithm>
+#include <limits>
 #include <stdexcept>
 
 #include "Expression.h"
@@ -17,8 +18,12 @@ MinimizationResult DichotomyMinimizer::minimize(const MinimizationContext& ctx) 
   if (a >= b) {
     throw std::runtime_error("Invalid interval: a must be less than b");
   }
+  constexpr double kMinEps = 1e-12;
   if (eps <= 0.0) {
     throw std::runtime_error("Invalid eps: must be positive");
+  }
+  if (eps < kMinEps) {
+    eps = kMinEps;
   }
 
   MinimizationResult result;
@@ -35,9 +40,12 @@ MinimizationResult DichotomyMinimizer::minimize(const MinimizationContext& ctx) 
   if (delta <= 0.0) {
     throw std::runtime_error("Invalid delta: must be positive");
   }
-  delta = std::min(delta, eps * 0.5);
+  double max_delta = 0.25 * (b - a);
+  double min_delta = std::max(kMinEps * 0.5, std::numeric_limits<double>::epsilon());
+  delta = std::clamp(delta, min_delta, max_delta);
 
   int k = 0;
+  const int max_iters = 2'000'000;
 
   while (true) {
     double mid = 0.5 * (a + b);
@@ -57,6 +65,9 @@ MinimizationResult DichotomyMinimizer::minimize(const MinimizationContext& ctx) 
       break;
     }
     ++k;
+    if (k > max_iters) {
+      throw std::runtime_error("DichotomyMinimizer: iteration limit exceeded; eps may be too small");
+    }
   }
 
   result.x_min = 0.5 * (a + b);
@@ -64,4 +75,4 @@ MinimizationResult DichotomyMinimizer::minimize(const MinimizationContext& ctx) 
   return result;
 }
 
-}  // namespace matan
+}

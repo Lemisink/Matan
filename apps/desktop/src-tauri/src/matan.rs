@@ -32,7 +32,6 @@ pub struct Task1Data {
 pub struct Task2Data {
   pub combined: Vec<[f64; 6]>,
   pub rmse: Vec<[f64; 4]>,
-  pub derivative_expr: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -85,15 +84,12 @@ pub fn run_task(app: tauri::AppHandle, params: TaskParams) -> Result<TaskRespons
       } else {
         Vec::new()
       };
-      let derivative_expr =
-        fs::read_to_string(&data_dir.join("task2_derivative.txt")).unwrap_or_default();
       Ok(TaskResponse {
         task: "differentiate".to_string(),
         task1: None,
         task2: Some(Task2Data {
           combined,
           rmse,
-          derivative_expr: derivative_expr.trim().to_string(),
         }),
       })
     }

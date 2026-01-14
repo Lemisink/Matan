@@ -47,4 +47,4 @@ class Minimizer {
   std::string method_name_;
 };
 
-}  // namespace matan
+}

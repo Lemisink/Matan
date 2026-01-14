@@ -26,4 +26,4 @@ class Task2Central final : public Task2Base {
   TaskResult run(const TaskContext& ctx) const override;
 };
 
-}  // namespace matan
+}

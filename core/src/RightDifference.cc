@@ -25,7 +25,7 @@ DerivativeResult RightDifference::differentiate(const DifferentiationContext& ct
     } else {
       d_est = (y[i + 1] - y[i]) / grid.h;
     }
-    double d_true = ctx.df.eval(x[i]);
+    double d_true = ctx.f.derivative(x[i]);
     logSample(result, i, x[i], y[i], d_true, d_est);
   }
 
@@ -33,4 +33,4 @@ DerivativeResult RightDifference::differentiate(const DifferentiationContext& ct
   return result;
 }
 
-}  // namespace matan
+}

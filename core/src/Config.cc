@@ -46,4 +46,4 @@ Config Config::load(const std::string& path) {
   return cfg;
 }
 
-}  // namespace matan
+}

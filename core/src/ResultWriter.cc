@@ -42,7 +42,7 @@ void removeTaskFiles(const std::string& dir, const std::string& prefix) {
   }
 }
 
-}  // namespace
+}
 
 void writeTask1Result(const MinimizationResult& result, const std::string& func_expr, double a,
                       double b, const std::string& data_dir) {
@@ -159,14 +159,4 @@ void writeTask2Combined(const Task2Results& results, const std::string& data_dir
   }
 }
 
-void writeTask2DerivativeExpr(const std::string& expr, const std::string& data_dir) {
-  ensureDir(data_dir);
-  const std::string path = data_dir + "/task2_derivative.txt";
-  std::ofstream out(path);
-  if (!out) {
-    throw std::runtime_error("Failed to open " + path);
-  }
-  out << expr << "\n";
 }
-
-}  // namespace matan

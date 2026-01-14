@@ -20,4 +20,4 @@ TaskResult Task1Golden::run(const TaskContext& ctx) const {
   return minimizer.minimize(mctx);
 }
 
-}  // namespace matan
+}

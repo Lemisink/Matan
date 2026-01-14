@@ -1,6 +1,6 @@
 #include "Expression.h"
 
-#include <muParser.h>
+#include <exprtk.hpp>
 
 #include <cmath>
 #include <stdexcept>
@@ -9,12 +9,12 @@
 namespace matan {
 
 Expression::Expression(std::string expr)
-    : expr_(std::move(expr)), parser_(std::make_unique<mu::Parser>()) {
+    : expr_(std::move(expr)), parser_(std::make_unique<exprtk::parser<double>>()) {
   InitParser();
 }
 
 Expression::Expression(const Expression& other)
-    : expr_(other.expr_), parser_(std::make_unique<mu::Parser>()) {
+    : expr_(other.expr_), parser_(std::make_unique<exprtk::parser<double>>()) {
   InitParser();
 }
 
@@ -22,14 +22,14 @@ Expression& Expression::operator=(const Expression& other) {
   if (this != &other) {
     expr_ = other.expr_;
     x_ = 0.0;
-    parser_ = std::make_unique<mu::Parser>();
+    parser_ = std::make_unique<exprtk::parser<double>>();
     InitParser();
   }
   return *this;
 }
 
 Expression::Expression(Expression&& other) noexcept
-    : expr_(std::move(other.expr_)), parser_(std::make_unique<mu::Parser>()) {
+    : expr_(std::move(other.expr_)), parser_(std::make_unique<exprtk::parser<double>>()) {
   InitParser();
 }
 
@@ -37,7 +37,7 @@ Expression& Expression::operator=(Expression&& other) noexcept {
   if (this != &other) {
     expr_ = std::move(other.expr_);
     x_ = 0.0;
-    parser_ = std::make_unique<mu::Parser>();
+    parser_ = std::make_unique<exprtk::parser<double>>();
     InitParser();
   }
   return *this;
@@ -46,26 +46,34 @@ Expression& Expression::operator=(Expression&& other) noexcept {
 Expression::~Expression() = default;
 
 void Expression::InitParser() {
-  try {
-    parser_->DefineVar("x", &x_);
-    parser_->SetExpr(expr_);
-  } catch (const mu::Parser::exception_type& ex) {
-    throw std::runtime_error(std::string("muParser error: ") + ex.GetMsg());
+  symbol_table_.clear();
+  symbol_table_.add_variable("x", x_);
+  exprtk_expr_.register_symbol_table(symbol_table_);
+  bool ok = parser_->compile(expr_, exprtk_expr_);
+  if (!ok) {
+    throw std::runtime_error("exprtk parse error");
   }
 }
 
 double Expression::eval(double x) const {
   x_ = x;
-  try {
-    double v = parser_->Eval();
-    if (!std::isfinite(v)) {
-      throw std::runtime_error("Function is not finite at x=" + std::to_string(x_) +
-                               ". Adjust the interval to avoid poles/singularities.");
-    }
-    return v;
-  } catch (const mu::Parser::exception_type& ex) {
-    throw std::runtime_error(std::string("muParser error: ") + ex.GetMsg());
+  double v = exprtk_expr_.value();
+  if (!std::isfinite(v)) {
+    throw std::runtime_error("Function is not finite at x=" + std::to_string(x_) +
+                             ". Adjust the interval to avoid poles/singularities.");
   }
+  return v;
 }
 
-}  // namespace matan
+double Expression::derivative(double x) const {
+  x_ = x;
+  double d =
+      exprtk::derivative(exprtk_expr_, "x", std::max(1e-8, std::abs(x_) * 1e-4 + 1e-6));
+  if (!std::isfinite(d)) {
+    throw std::runtime_error("Derivative is not finite at x=" + std::to_string(x) +
+                             ". Adjust the interval to avoid poles/singularities.");
+  }
+  return d;
+}
+
+}

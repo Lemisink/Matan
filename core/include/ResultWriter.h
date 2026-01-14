@@ -18,6 +18,4 @@ void writeTask2Rmse(const std::vector<Task2RmseRow>& sweep, const std::string& d
 
 void writeTask2Combined(const Task2Results& results, const std::string& data_dir);
 
-void writeTask2DerivativeExpr(const std::string& expr, const std::string& data_dir);
-
-}  // namespace matan
+}

@@ -17,8 +17,12 @@ MinimizationResult GoldenSectionMinimizer::minimize(const MinimizationContext& c
   if (a >= b) {
     throw std::runtime_error("Invalid interval: a must be less than b");
   }
+  constexpr double kMinEps = 1e-12;
   if (eps <= 0.0) {
     throw std::runtime_error("Invalid eps: must be positive");
+  }
+  if (eps < kMinEps) {
+    eps = kMinEps;
   }
 
   const double tau = (std::sqrt(5.0) - 1.0) * 0.5;
@@ -30,6 +34,7 @@ MinimizationResult GoldenSectionMinimizer::minimize(const MinimizationContext& c
   MinimizationResult result;
   int k = 0;
 
+  const int max_iters = 2'000'000;
   while (true) {
     logIteration(result, k, a, b, y, z, fy, fz);
 
@@ -51,6 +56,9 @@ MinimizationResult GoldenSectionMinimizer::minimize(const MinimizationContext& c
       fz = f.eval(z);
     }
     ++k;
+    if (k > max_iters) {
+      throw std::runtime_error("GoldenSectionMinimizer: iteration limit exceeded; eps may be too small");
+    }
   }
 
   result.x_min = 0.5 * (a + b);
@@ -58,4 +66,4 @@ MinimizationResult GoldenSectionMinimizer::minimize(const MinimizationContext& c
   return result;
 }
 
-}  // namespace matan
+}

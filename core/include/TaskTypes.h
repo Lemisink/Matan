@@ -102,4 +102,4 @@ inline std::string toString(Task2Method value) {
   }
 }
 
-}  // namespace matan
+}

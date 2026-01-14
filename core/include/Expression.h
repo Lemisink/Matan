@@ -3,9 +3,7 @@
 #include <memory>
 #include <string>
 
-namespace mu {
-class Parser;
-}
+#include <exprtk.hpp>
 
 namespace matan {
 
@@ -18,12 +16,15 @@ class Expression {
   Expression& operator=(Expression&& other) noexcept;
   ~Expression();
   double eval(double x) const;
+  double derivative(double x) const;
 
  private:
   void InitParser();
   std::string expr_;
   mutable double x_ = 0.0;
-  std::unique_ptr<mu::Parser> parser_;
+  std::unique_ptr<exprtk::parser<double>> parser_;
+  mutable exprtk::symbol_table<double> symbol_table_;
+  mutable exprtk::expression<double> exprtk_expr_;
 };
 
-}  // namespace matan
+}

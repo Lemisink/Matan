@@ -21,4 +21,4 @@ class Task1Golden final : public Task1Base {
   TaskResult run(const TaskContext& ctx) const override;
 };
 
-}  // namespace matan
+}

@@ -10,4 +10,4 @@ class RightDifference final : public Differentiator {
   DerivativeResult differentiate(const DifferentiationContext& ctx) const override;
 };
 
-}  // namespace matan
+}

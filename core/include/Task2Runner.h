@@ -11,7 +11,6 @@ struct Task2Results {
   DerivativeResult right;
   DerivativeResult left;
   DerivativeResult central;
-  std::string derivative_expr;
 };
 
 struct Task2RmseRow {
@@ -26,6 +25,4 @@ Task2Results runAllDifferences(const std::string& f_str, double a, double b, dou
 std::vector<Task2RmseRow> runRmseSweep(const std::string& f_str, double a, double b, double h0,
                                        int steps);
 
-std::string deriveSymbolicDerivative(const std::string& f_str);
-
-}  // namespace matan
+}

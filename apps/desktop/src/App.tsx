@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import type { EChartsOption } from "echarts";
 import { invoke } from "@tauri-apps/api/core";
@@ -29,7 +29,6 @@ type Task1Data = {
 type Task2Data = {
   combined: [number, number, number, number, number, number][];
   rmse: [number, number, number, number][];
-  derivativeExpr: string;
 };
 
 type TaskResponse = {
@@ -50,6 +49,71 @@ const DEFAULT_FORM: TaskParams = {
 };
 
 const SERIES_COLORS = ["#0f6d5d", "#d26a3a", "#2a4f87", "#b1496b"];
+
+type Option = { label: string; value: string };
+
+function DropdownField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Option[];
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const current = options.find((o) => o.value === value);
+
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <div className="dropdown" ref={ref}>
+        <button
+          type="button"
+          className="dropdown-trigger"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+        >
+          <span>{current ? current.label : "Select"}</span>
+          <span className="dropdown-caret" />
+        </button>
+        {open ? (
+          <div className="dropdown-menu" role="listbox">
+            {options.map((opt) => (
+              <div
+                key={opt.value}
+                className={`dropdown-option ${opt.value === value ? "selected" : ""}`}
+                role="option"
+                aria-selected={opt.value === value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+              >
+                {opt.label}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </label>
+  );
+}
 
 function ChartCard({
   title,
@@ -263,16 +327,15 @@ function App() {
         <aside className="panel">
           <div className="panel-section">
             <h2>Task</h2>
-            <label className="field">
-              <span>Mode</span>
-              <select
-                value={form.task}
-                onChange={(e) => updateField("task", e.target.value as TaskKind)}
-              >
-                <option value="minimize">Minimize</option>
-                <option value="differentiate">Differentiate</option>
-              </select>
-            </label>
+            <DropdownField
+              label="Mode"
+              value={form.task}
+              options={[
+                { label: "Minimize", value: "minimize" },
+                { label: "Differentiate", value: "differentiate" },
+              ]}
+              onChange={(v) => updateField("task", v as TaskKind)}
+            />
           </div>
 
           <div className="panel-section">
@@ -297,16 +360,15 @@ function App() {
           {form.task === "minimize" ? (
             <div className="panel-section">
               <h2>Minimization</h2>
-              <label className="field">
-                <span>Method</span>
-                <select
-                  value={form.task1Method}
-                  onChange={(e) => updateField("task1Method", e.target.value as Task1Method)}
-                >
-                  <option value="dichotomy">Dichotomy</option>
-                  <option value="golden">Golden section</option>
-                </select>
-              </label>
+              <DropdownField
+                label="Method"
+                value={form.task1Method}
+                options={[
+                  { label: "Dichotomy", value: "dichotomy" },
+                  { label: "Golden section", value: "golden" },
+                ]}
+                onChange={(v) => updateField("task1Method", v as Task1Method)}
+              />
               <label className="field">
                 <span>eps</span>
                 <input
@@ -318,14 +380,6 @@ function App() {
           ) : (
             <div className="panel-section">
               <h2>Differentiation</h2>
-              <div className="field readonly">
-                <span>f'(x)</span>
-                <div className="pill">
-                  {result?.task2?.derivativeExpr
-                    ? result.task2.derivativeExpr
-                    : "auto (GiNaC)"}
-                </div>
-              </div>
               <label className="field">
                 <span>h</span>
                 <input value={form.h} onChange={(e) => updateField("h", e.target.value)} />
