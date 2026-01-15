@@ -1,9 +1,5 @@
 # Report: Differentiation and Minimization (10 Functions)
 
-## Data source
-All data was generated using the AppImage in `done/` (`Matan Lab_0.1.0_amd64.AppImage`).  
-The embedded `matan_app` inside the AppImage was used to compute the “true” derivative and all numeric methods.
-
 ## Functions and intervals
 1) `sin(x) + x^3`, `[-2, 2]`  
 2) `cos(x) - 0.5*x`, `[-3, 3]`  
