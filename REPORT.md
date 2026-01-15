@@ -14,7 +14,6 @@
 
 ## Differentiation (RMSE vs true derivative)
 Step sizes: `h = 0.1`, `0.05`, `0.025`.  
-RMSE is computed from `task2_all.dat` (right/left/central vs `d_true`).
 
 | # | Function | Interval | h | RMSE right | RMSE left | RMSE central |
 |---|----------|----------|---|------------|-----------|--------------|
@@ -51,7 +50,6 @@ RMSE is computed from `task2_all.dat` (right/left/central vs `d_true`).
 
 ## Minimization
 Methods: `golden` and `dichotomy`.  
-Iterations are counted from `task1_<method>_points.dat`.
 
 ### eps = 1e-4
 
