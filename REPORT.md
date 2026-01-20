@@ -18,24 +18,24 @@ Minimization methods:
   y = m - delta, z = m + delta. After comparing f(y) and f(z), it keeps the
   half containing the smaller value. Each step reduces the interval roughly by
   1/2 (slightly less because of delta), so iterations are about
-  log2((b - a) / (2 * eps)). Termination: (b - a) <= 2 * eps.
+  log<sub>2</sub>((b - a) / (2 * eps)). Termination: (b - a) <= 2 * eps.
   In the implementation, delta defaults to eps / 2 and is clamped to a safe
   range relative to (b - a) to keep y, z inside the interval.
 
 Numerical differentiation methods (uniform grid step h):
-Let x_i = a + i * h, i = 0..n, with n = (b - a) / h (must be integer).
-We precompute y_i = f(x_i) and then build derivatives.
-- Right difference: f'(x_i) ~= (f(x_{i+1}) - f(x_i)) / h, error O(h).
-- Left difference: f'(x_i) ~= (f(x_i) - f(x_{i-1})) / h, error O(h).
-- Central difference: f'(x_i) ~= (f(x_{i+1}) - f(x_{i-1})) / (2h), error O(h^2).
+Let x<sub>i</sub> = a + i * h, i = 0..n, with n = (b - a) / h (must be integer).
+We precompute y<sub>i</sub> = f(x<sub>i</sub>) and then build derivatives.
+- Right difference: f'(x<sub>i</sub>) ~= (f(x<sub>i+1</sub>) - f(x<sub>i</sub>)) / h, error O(h).
+- Left difference: f'(x<sub>i</sub>) ~= (f(x<sub>i</sub>) - f(x<sub>i-1</sub>)) / h, error O(h).
+- Central difference: f'(x<sub>i</sub>) ~= (f(x<sub>i+1</sub>) - f(x<sub>i-1</sub>)) / (2h), error O(h<sup>2</sup>).
 At the boundaries, second-order one-sided formulas are used:
-f'(x_0) ~= (-3 f_0 + 4 f_1 - f_2) / (2h),
-f'(x_n) ~= (f_{n-2} - 4 f_{n-1} + 3 f_n) / (2h).
+f'(x<sub>0</sub>) ~= (-3 f<sub>0</sub> + 4 f<sub>1</sub> - f<sub>2</sub>) / (2h),
+f'(x<sub>n</sub>) ~= (f<sub>n-2</sub> - 4 f<sub>n-1</sub> + 3 f<sub>n</sub>) / (2h).
 
 Quality metric:
-- RMSE = sqrt((1 / n) * sum_i (d_i - d_true_i)^2), where d_true is computed by
+- RMSE = sqrt((1 / n) * sum<sub>i</sub> (d<sub>i</sub> - d<sub>true,i</sub>)<sup>2</sup>), where d<sub>true</sub> is computed by
   the app using exprtk::derivative with an internal step size
-  h_true = max(1e-8, |x| * 1e-4 + 1e-6).
+  h<sub>true</sub> = max(1e-8, |x| * 1e-4 + 1e-6).
   RMSE is computed over the full grid and reported per method.
 
 Implementation in code:
