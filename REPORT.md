@@ -1,4 +1,55 @@
-# Report: Differentiation and Minimization (10 Functions)
+# Report: Differentiation and Minimization
+
+## Analytical background
+The lab covers one-dimensional minimization on a closed interval and numerical
+differentiation on a uniform grid. For minimization we assume f is continuous
+and unimodal on [a, b], so interval-reduction methods converge to the global
+minimum. If f or f' has poles/singularities inside the interval, the program
+stops with an error and the interval must be adjusted.
+
+Minimization methods:
+- Golden section search keeps [a, b] and evaluates
+  y = a + (1 - tau) * (b - a), z = a + tau * (b - a),
+  tau = (sqrt(5) - 1) / 2. The interval is reduced toward the point with the
+  smaller f(x). Each step shrinks the interval by factor tau ~ 0.618, so the
+  iteration count is about log((b - a) / eps) / log(1 / tau).
+  Termination: (b - a) <= eps.
+- Dichotomy uses midpoint m = (a + b) / 2 and probes
+  y = m - delta, z = m + delta. After comparing f(y) and f(z), it keeps the
+  half containing the smaller value. Each step reduces the interval roughly by
+  1/2 (slightly less because of delta), so iterations are about
+  log2((b - a) / (2 * eps)). Termination: (b - a) <= 2 * eps.
+  In the implementation, delta defaults to eps / 2 and is clamped to a safe
+  range relative to (b - a) to keep y, z inside the interval.
+
+Numerical differentiation methods (uniform grid step h):
+Let x_i = a + i * h, i = 0..n, with n = (b - a) / h (must be integer).
+We precompute y_i = f(x_i) and then build derivatives.
+- Right difference: f'(x_i) ~= (f(x_{i+1}) - f(x_i)) / h, error O(h).
+- Left difference: f'(x_i) ~= (f(x_i) - f(x_{i-1})) / h, error O(h).
+- Central difference: f'(x_i) ~= (f(x_{i+1}) - f(x_{i-1})) / (2h), error O(h^2).
+At the boundaries, second-order one-sided formulas are used:
+f'(x_0) ~= (-3 f_0 + 4 f_1 - f_2) / (2h),
+f'(x_n) ~= (f_{n-2} - 4 f_{n-1} + 3 f_n) / (2h).
+
+Quality metric:
+- RMSE = sqrt((1 / n) * sum_i (d_i - d_true_i)^2), where d_true is computed by
+  the app using exprtk::derivative with an internal step size
+  h_true = max(1e-8, |x| * 1e-4 + 1e-6).
+  RMSE is computed over the full grid and reported per method.
+
+Implementation in code:
+- Golden section: `core/src/GoldenSectionMinimizer.cc`
+- Dichotomy: `core/src/DichotomyMinimizer.cc`
+- Task 1 flow: `core/src/Task1.cc`
+- Right/Left/Central differences: `core/src/RightDifference.cc`,
+  `core/src/LeftDifference.cc`, `core/src/CentralDifference.cc`
+- Grid building + boundary formulas: `core/src/DiffCommon.h`
+- Task 2 flow: `core/src/Task2.cc`
+- Expression parsing + true derivative: `core/src/Expression.cc`
+
+## Contacts
+- @SanceiLaks
 
 ## Functions and intervals
 1) `sin(x) + x^3`, `[-2, 2]`  
