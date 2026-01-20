@@ -8,59 +8,34 @@ minimum. If f or f' has poles/singularities inside the interval, the program
 stops with an error and the interval must be adjusted.
 
 Minimization methods:
-- Golden section search keeps [a, b] and evaluates two interior points:
-  $$
-  y = a + (1-\tau)(b-a), \quad z = a + \tau(b-a), \quad \tau = \frac{\sqrt{5}-1}{2}
-  $$
-  The interval is reduced toward the point with the smaller f(x). Each step
-  shrinks the interval by factor tau ~ 0.618, so the iteration count is about
-  $$
-  k \approx \frac{\log((b-a)/\varepsilon)}{\log(1/\tau)}
-  $$
+- Golden section search keeps [a, b] and evaluates
+  y = a + (1 - tau) * (b - a), z = a + tau * (b - a),
+  tau = (sqrt(5) - 1) / 2. The interval is reduced toward the point with the
+  smaller f(x). Each step shrinks the interval by factor tau ~ 0.618, so the
+  iteration count is about log((b - a) / eps) / log(1 / tau).
   Termination: (b - a) <= eps.
-- Dichotomy uses midpoint and two probes:
-  $$
-  m = \frac{a+b}{2}, \quad y = m - \delta, \quad z = m + \delta
-  $$
-  After comparing f(y) and f(z), it keeps the half containing the smaller value.
-  Each step reduces the interval roughly by 1/2 (slightly less because of
-  delta), so
-  $$
-  k \approx \log_2\left(\frac{b-a}{2\varepsilon}\right)
-  $$
-  Termination: (b - a) <= 2 * eps. In the implementation, delta defaults to
-  eps / 2 and is clamped to a safe range relative to (b - a).
+- Dichotomy uses midpoint m = (a + b) / 2 and probes
+  y = m - delta, z = m + delta. After comparing f(y) and f(z), it keeps the
+  half containing the smaller value. Each step reduces the interval roughly by
+  1/2 (slightly less because of delta), so iterations are about
+  log<sub>2</sub>((b - a) / (2 * eps)). Termination: (b - a) <= 2 * eps.
+  In the implementation, delta defaults to eps / 2 and is clamped to a safe
+  range relative to (b - a) to keep y, z inside the interval.
 
 Numerical differentiation methods (uniform grid step h):
-Let x_i = a + i h, i = 0..n, with n = (b - a) / h (must be integer).
-We precompute y_i = f(x_i) and then build derivatives:
-- Right difference:
-  $$
-  f'(x_i) \approx \frac{f(x_{i+1}) - f(x_i)}{h}, \quad \text{error } O(h)
-  $$
-- Left difference:
-  $$
-  f'(x_i) \approx \frac{f(x_i) - f(x_{i-1})}{h}, \quad \text{error } O(h)
-  $$
-- Central difference:
-  $$
-  f'(x_i) \approx \frac{f(x_{i+1}) - f(x_{i-1})}{2h}, \quad \text{error } O(h^2)
-  $$
+Let x<sub>i</sub> = a + i * h, i = 0..n, with n = (b - a) / h (must be integer).
+We precompute y<sub>i</sub> = f(x<sub>i</sub>) and then build derivatives.
+- Right difference: f'(x<sub>i</sub>) ~= (f(x<sub>i+1</sub>) - f(x<sub>i</sub>)) / h, error O(h).
+- Left difference: f'(x<sub>i</sub>) ~= (f(x<sub>i</sub>) - f(x<sub>i-1</sub>)) / h, error O(h).
+- Central difference: f'(x<sub>i</sub>) ~= (f(x<sub>i+1</sub>) - f(x<sub>i-1</sub>)) / (2h), error O(h<sup>2</sup>).
 At the boundaries, second-order one-sided formulas are used:
-$$
-f'(x_0) \approx \frac{-3 f_0 + 4 f_1 - f_2}{2h}, \quad
-f'(x_n) \approx \frac{f_{n-2} - 4 f_{n-1} + 3 f_n}{2h}
-$$
+f'(x<sub>0</sub>) ~= (-3 f<sub>0</sub> + 4 f<sub>1</sub> - f<sub>2</sub>) / (2h),
+f'(x<sub>n</sub>) ~= (f<sub>n-2</sub> - 4 f<sub>n-1</sub> + 3 f<sub>n</sub>) / (2h).
 
 Quality metric:
-- RMSE is computed over the grid:
-  $$
-  \mathrm{RMSE} = \sqrt{\frac{1}{n} \sum_i (d_i - d^{true}_i)^2}
-  $$
-  where d_true is computed by the app using exprtk::derivative with internal step
-  $$
-  h_{true} = \max(10^{-8}, |x| \cdot 10^{-4} + 10^{-6})
-  $$
+- RMSE = sqrt((1 / n) * sum<sub>i</sub> (d<sub>i</sub> - d<sub>true,i</sub>)<sup>2</sup>), where d<sub>true</sub> is computed by
+  the app using exprtk::derivative with an internal step size
+  h<sub>true</sub> = max(1e-8, |x| * 1e-4 + 1e-6).
   RMSE is computed over the full grid and reported per method.
 
 Implementation in code:
